@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1599888378 source:c:\users\shendi\documents\calcula\calculadora.c
+	<stdio.h>
+	<stdlib.h>
+	"aritmetica.h"
+
+1599882909 c:\users\shendi\documents\calcula\aritmetica.c
+	<stdio.h>
+	"aritmetica.h"
+
+1617142851 c:\users\shendi\documents\calcula\aritmetica.h
+	<stdio.h>
+
+1617142851 source:c:\users\shendi\documents\calcula\aritmetica.c
+	<stdio.h>
+	"aritmetica.h"
+
