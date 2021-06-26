@@ -8,224 +8,113 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 #include <ctype.h>
-#include <time.h>
-#include <stdlib.h>
+#include "utn.h"
 #include "ArrayEmployees.h"
 
-#define TAM 3
-#define FALSO 0
-#define VERDAD 1
-#define ERROR -1
-#define EXITO 0
 
-int main()
-{
-	setbuf(stdout,NULL);
-    sEmployee empleado[TAM];
-    int opcion;
-    int es;
-    int idAutomatico;
-    int orden;
-    int flagHayEmpleado;
-    int optionEdit;
-    int sector;
-    char name[20];
-    char lastname[20];
-    char salaryAux[50];
-    char sectorAux[50];
-    char respuesta;
-    float salary;
 
-    initEmployees(empleado, TAM);
+int main(void) {
+	setbuf(stdout, NULL);
+	float pPromedio;
+	char seguir='s';
+	int bandera=0;
+	Employee empleados[5];
+	initEmployees(empleados, 5);
 
-    do
-    {
-        es = ERROR;
-        opcion = showMenuAndGetOption();
-        switch(opcion)
-        {
-        case 1:
-            if(findFreePlace(empleado, TAM) == EXITO)
-            {
 
-                if (!getStringLetras("Ingrese el nombre: ",name))
-                {
-                    printf ("El nombre debe estar compuesto solo por letras\n");
-                    break;
-                }
-                if (!getStringLetras("\nIngrese el apellido: ",lastname))
-                {
-                    printf ("El apellido debe estar compuesto solo por letras\n");
-                    break;
-                }
-                if (!getStringNumeros("\nIngrese el salario: ",salaryAux))
-                {
-                    printf ("El salario debe ser numerico\n");
-                    break;
-                }
-                salary = atoi(salaryAux);
+	do
+	{
+		switch (menu())
+		{
+			case 1:
+				addEmployee(empleados, 5);
+				bandera++;
+				system("pause");
+				system("cls");
 
-                if (!getStringNumeros("\nIngrese el sector: ",sectorAux))
-                {
-                    printf ("El sector debe ser numerico\n");
+				break;
+			case 2:
+				if(bandera>0)
+				{
+					if(modificarEmployee(empleados, 5)!=-1)
+					{
+						printf("\nse pudo modificar correctamente");
+					}else
+					{
+						printf("\nNo se pudo modificar");
+					}
 
-                    break;
-                }
-                sector = atoi(sectorAux);
-                es = addEmployee(empleado, TAM, idAutomatico, name, lastname, salary, sector);
-                if(es == EXITO)
-                {
-                    flagHayEmpleado = VERDAD;
-                }
-                else
-                {
-                    flagHayEmpleado = FALSO;
-                }
-                showMessage(es, 1, flagHayEmpleado);
-            }
-            else
-            {
-                printf("Array lleno.\n\n");
-            }
-            break;
-        case 2:
-            flagHayEmpleado = hayEmpleados(empleado, TAM);
+				}else
+					printf("\nNo se ingreso ningun empleado todavia \n");
 
-            if(flagHayEmpleado == VERDAD)
-            {
-                idAutomatico = getIDEmployee(empleado,TAM);
-                es = removeEmployee(empleado, TAM, idAutomatico);
-                break;
-            }
-            printf("\nDebe dar de alta a un empleado para realizar esta opcion.");
+				break;
+			case 3:
+				if(bandera>0)
+				{
+					removeEmployee(empleados, 5);
 
-            break;
-        case 3:
-            flagHayEmpleado = hayEmpleados(empleado, TAM);
+					system("pause");
+					system("cls");
+				}else
+				{
+					printf("\nNo se ingreso ningun empleado todavia \n");
+				}
+				break;
+			case 4:
+			if(bandera>0)
+			{
+				switch (informes())
+				{
 
-            if(flagHayEmpleado == VERDAD)
-            {
-                idAutomatico = getindex(empleado,TAM);
+						case 1:
 
-                if(idAutomatico >= 0)
-                {
-                    optionEdit = getOptionEdit();
+							if(sortEmployeesLastNameSector(empleados, 5) !=-1)
+							{
+								sortEmployeesLastNameSector(empleados, 5);
+								printEmployee(empleados, 5);
+							}else
+							{
+								printf("\nNo encontro usuarios");
+							}
 
-                    switch((int) optionEdit)
-                    {
-                    case 1:
-                        if (!getStringLetras("Ingrese nuevo nombre: ",name))
-                        {
-                            printf ("El nombre debe estar compuesto solo por letras\n");
-                            es=ERROR;
-                            break;
-                        }
-                        strcpy(empleado[idAutomatico].name, name);
-                        es = EXITO;
-                        break;
-                    case 2:
-                        if (!getStringLetras("\nIngrese nuevo apellido: ",lastname))
-                        {
-                            printf ("El apellido debe estar compuesto solo por letras\n");
-                            es=ERROR;
-                            break;
-                        }
-                        strcpy(empleado[idAutomatico].lastName, lastname);
-                        es = EXITO;
-                        break;
-                    case 3:
-                        if (!getStringNumeros("\nIngrese el nuevo salario: ",salaryAux))
-                        {
-                            printf ("El salario debe ser numerico\n");
-                            break;
+							break;
+						case 2:
+							if(calcularSalariosYpromedio(empleados, 5,&pPromedio) !=-1)
+							{
+								printf("\nEl total de los salarios es =$%.2f\n",calcularSalariosYpromedio(empleados,5,&pPromedio));
+								printf("\nEl promedio de los salarios es =$%.2f\n",pPromedio);
+								printf("\nLa cantidad de sueldo que superan el promedio es = %d\n",calcSueldosMayores(empleados,5,pPromedio));
+							}
+							break;
+						case 3:
 
-                        }
-                        else
-                        {
-                            salary = atoi(salaryAux);
-                            empleado[idAutomatico].salary=salary;
-                            es = EXITO;
-                        }
-                        break;
-                    case 4:
-                        if (!getStringNumeros("\nIngrese el nuevo sector: ",sectorAux))
-                        {
-                            printf ("El sector debe ser numerico\n");
-                        }
-                        else
-                        {
-                            sector = atoi(salaryAux);
-                            empleado[idAutomatico].sector=sector;
-                            es = EXITO;
-                        }
-                        break;
-                    default:
-                        es=ERROR;
-                        printf("Opcion incorrecta\n");
-                        break;
-                    }
-                }
-                else
-                {
-                    showMessage(es, 5, flagHayEmpleado);
-                }
-            }
-            else
-            {
-                showMessage(es, 4, flagHayEmpleado);
-            }
-            break;
-        case 4:
-            flagHayEmpleado = hayEmpleados(empleado, TAM);
+							break;
+						default:
+							printf("\nOpcion invalida!!\n\n");
+							break;
+						}
+				}
+				else
+				{
+					printf("\nNo se ingreso ningun empleado todavia \n");
+				}
 
-            if( flagHayEmpleado == VERDAD)
-            {
-                es = printEmployees(empleado, TAM);
-                if(es == ERROR)
-                {
-                    printf("Error al imprimir los empleados.\n\n");
-                }
-                TotalPromedioSalarios(empleado, TAM);
-                es = EXITO;
-            }
-            else
-            {
-                showMessage(es, 4, flagHayEmpleado);
-            }
-            break;
+	                break;
+	                case 5:
+	                system("cls");
+	                seguir='n';
 
-        case 5:
-            flagHayEmpleado = hayEmpleados(empleado, TAM);
+	                break;
 
-            if( flagHayEmpleado == VERDAD)
-            {
-                orden = getOrder();
-                es = sortEmployees(empleado, TAM, orden);
-                if(es == ERROR)
-                {
-                    printf("Error al ordenar la lista de empleados.\n\n");
-                }
+	            default:
+	                system("cls");
+	                printf("\nIngrese opcion correcta\n\n");
+	                break;
+	        }
+	                fflush(stdin);
+	            }while (seguir=='s');
 
-                es = printEmployees(empleado, TAM);
-                if(es == ERROR)
-                {
-                    printf("Error al imprimir los empleados.\n\n");
-                }
-                TotalPromedioSalarios(empleado, TAM);
-                es = EXITO;
-            }
-            else
-            {
-                showMessage(es, 4, flagHayEmpleado);
-            }
-            break;
-        default:
-            break;
-        }
-        respuesta = getRespuesta();
-    }
-    while(respuesta == 's');
-
-    return 0;
+	return 0;
 }

@@ -7,463 +7,456 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 #include <ctype.h>
-#include <time.h>
-#include <stdlib.h>
+#include "utn.h"
 #include "ArrayEmployees.h"
+static int generarIdNuevo(void);
 
-#define FALSO 0
-#define VERDAD 1
-#define ERROR -1
-#define EXITO 0
-#define DESCENDENTE 0
-#define ASCENDENTE 1
-
-
-
-int initEmployees(sEmployee* list, int len)
+/**
+ * \brief Inicializa el array de alumnos
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \return (-1) Error / (0) Ok
+ *
+ */
+int initEmployees(Employee* list, int len)
 {
-    int ret = ERROR;
+	int retorno = -1;
+	if(list != NULL && len > 0)
+	{
+		for(int i=0;i<len;i++)
+		{
+			list[i].isEmpty = TRUE;
+		}
+		retorno = 0;
+	}
+	return retorno;
+}
+
+
+/**
+ * \brief Busca usuarios que no contengan iformacion
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \return (-1) Error / (0) Ok
+ *
+ */
+int buscarLibre(Employee* list, int len)
+{
+	int retorno =-1;
+	int i;
+	if (list != NULL && len > 0)
+	{
+		for(i=0; i < len ;i++)
+			{
+				if (list[i].isEmpty==1)
+				{
+					retorno = i;
+					break;
+				}
+			}
+	}
+	return retorno;
+}
+
+
+/* Cada vez que la llamo me devuelve un ID nuevo
+ * que nunca me devolvio antes
+ */
+
+static int generarIdNuevo(void)
+{
+	static int id=0; // es global para solo la fn puede usarla
+
+	//guardar el ultimo que asigne (ultimo que devolvi)
+	//para devolver 1+
+	id = id+1;
+	return id;
+}
+
+
+/**
+ * \brief Realiza el alta de un alumno solo si el indice corresponde a un Empty
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int len, es el limite de array
+ * \return (-1) Error / (0) Ok
+ *
+ */
+
+int addEmployee(Employee* list, int len)
+{
+	int retorno = -1;
+	int espacioLibre;
+	Employee bufferEmployee;
+
+
+	if(buscarLibre(list,len)>=0)
+	{
+		espacioLibre=buscarLibre(list, len);
+
+	}
+	if(	list != NULL && len > 0)
+	{
+		if(	utn_getInt("\nIngrese el Sector = ", "\n", &bufferEmployee.sector, 2, 9999999, 0) ==0 &&
+			utn_getNombre("\nIngrese nombre = ","\nError ingrese un nombre correcto",bufferEmployee.name,2,LONG_NOMBRE) == 0 &&
+			utn_getNombre("\nIngrese apellido = ","\nError ingrese un apellido correcto",bufferEmployee.lastName,2,LONG_NOMBRE) == 0 &&
+			utn_getFloat("\nIngrese el sueldo = ", "\nError ingrese un valor correcto (0-9999999)", &bufferEmployee.salary, 0, 9999999, 2)== 0)
+			{
+				bufferEmployee.id= generarIdNuevo();
+				bufferEmployee.isEmpty = FALSE;
+				list[espacioLibre] = bufferEmployee;
+
+			retorno = 0;
+		}
+	}
+	return retorno;
+}
+
+
+/**
+ * \brief Imprime los empleados  cargados
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \return (-1) Error / (0) Ok
+ *
+ */
+int printEmployee(Employee* list, int len)
+{
+	int retorno = -1;
+	int contador=0;
+	if(list != NULL && len > 0)
+	{
+		for(int i=0;i<len;i++)
+		{
+			if(list[i].isEmpty == FALSE)
+			{
+				mostrarUsuario(list, i);
+				contador++;
+			}
+		}
+
+		if (contador ==0)
+		{
+			printf("\nNo hay ningun usuario para mostrar\n");
+		}
+		retorno = 0;
+	}
+	return retorno;
+}
+
+
+
+
+/**
+ * \brief Imprime los empleados  cargados
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \return (-1) Error / (0) Ok
+ *
+ */
+int mostrarUsuario(Employee* list,int indice)
+{
+	int retorno = -1;
+
+	if(list != NULL && indice >= 0 )
+	{
+		if(list[indice].isEmpty==0)
+		{
+			printf("Id:%d - Sector: %d - Nombre: %s - apellido: %s - salario :%.2f \n",list[indice].id,list[indice].sector,list[indice].name,list[indice].lastName,list[indice].salary);
+			retorno = 0;
+		}else
+		{
+			printf("No existe el usuario");
+		}
+	}
+	return retorno;
+}
+
+
+
+/**
+ * \brief Imprime los empleados  cargados
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \param int id, es el idd que desea encontrar
+ * \return (-1) Error / (0) Ok
+ *
+ */
+int findEmployeeById(Employee* list,int len,int id)
+{
+	int retorno =-1;
+	if(list != NULL && len > 0)
+		{
+			for(int i=0;i<len;i++)
+			{
+				if(list[i].isEmpty == 0 && list[i].id== id)
+				{
+					retorno = i;
+					break;
+				}
+			}
+		}
+	return retorno;
+}
+
+
+/**
+ * \brief Elimina un usuario poniendo el isEmpty=1
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \return (-1) Error / (0) Ok
+ *
+ */
+
+int removeEmployee(Employee* list, int len)
+{
+
+	int retorno = -1;
+	if(list != NULL && len >= 0 )
+	{
+		int aux;
+		char Borrar;
+		int auxId;
+		if(	utn_getInt("\nIngrese el id del usuario que desea elimnar = ", "\n", &aux, 2, 9999999, 0)==0)
+		{
+			if(findEmployeeById(list, len, aux)!= -1 )
+			{
+				auxId=findEmployeeById(list, len, aux);
+				mostrarUsuario(list,auxId);
+				printf("\ndesea elimnar este usuario = (s - n)");
+				fflush(stdin);
+				scanf("%c",&Borrar);
+				if (Borrar=='s')
+				{
+					list[auxId].isEmpty=1;
+					printf("\nse elimino correctamente el usuario\n");
+					retorno=1;
+				}else
+				{
+					printf("\nse cancelo la eliminacion del usuario\n");
+				}
+			}else
+			{
+				printf("\nNo encontro un usuario con el id que ingresaste\n");
+			}
+		}
+	}
+ return retorno;
+}
+
+
+/**
+ * \brief calcula el promedio de todos los usuarios ingresados
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \param float* pPromedio, devuelve el promedio al main
+ * \return (-1) Error / (0) Ok
+ *
+ */
+
+float calcularSalariosYpromedio(Employee *list,int len,float* pPromedio)
+{
+	int retorno = -1;
+	float total=0;
+	float flag=0;
+	if(list != NULL && len >= 0)
+	{
+		for(int i=0;i<len;i++)
+		{
+			if(list[i].isEmpty == 0)
+			{
+				total=total + list[i].salary;
+				flag++;
+			}
+		}
+		*pPromedio=total/flag;
+		retorno = total;
+	}
+		return retorno;
+}
+
+
+
+/**
+ * \brief Modifica los datos de un alumno solo si el indice corresponde a un NO Empty
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \return (-1) Error / (0) Ok
+ *
+ */
+int modificarEmployee(Employee list[],int len)
+{
+	int retorno = -1;
+	int switchNumber;
+	Employee bufferEmployee;
+	int aux;
+	int auxId;
+
+
+	if(list != NULL && len >= 0 )
+	{
+
+		if(	utn_getInt("\nIngrese el id del usuario que desea cambiar = ", "\n", &aux, 2, 9999999, 0)==0)
+		{
+			auxId=findEmployeeById(list, len, aux);
+			if(list[auxId].isEmpty==0)
+			{
+				mostrarUsuario(list,auxId);
+				bufferEmployee = list[auxId];
+				printf("\nQue desea cambiar\n1-Nombre\n2-apellido\n3-salario\n4-sector\n5-salir");
+				fflush(stdin);
+				scanf("%d",&switchNumber);
+
+				switch (switchNumber)
+				{
+					case 1:
+						if(utn_getNombre("\nIngrese nombre = ","\nError ingrese un nombre correcto",bufferEmployee.name,2,LONG_NOMBRE)==0)
+						{
+							strncpy(list[auxId].name , bufferEmployee.name,51);
+						}
+						break;
+					case 2:
+						if(utn_getNombre("\nIngrese apellido = ","\nError ingrese un apellido correcto",bufferEmployee.lastName,2,LONG_NOMBRE) == 0 )
+						{
+							strncpy(list[auxId].lastName ,bufferEmployee.lastName,51);
+						}
+						break;
+					case 3:
+						if(utn_getFloat("\nIngrese el sueldo = ", "\nError ingrese un valor correcto (0-9999999)", &bufferEmployee.salary, 0, 9999999, 2)== 0)
+						{
+							list[auxId].salary = bufferEmployee.salary;
+						}
+						break;
+					case 4:
+						if(utn_getInt("\nIngrese el Sector = ", "\n", &bufferEmployee.sector, 2, 9999999, 0) ==0)
+						{
+							list[auxId].sector = bufferEmployee.sector;
+						}
+						break;
+					case 5:
+						printf("salio exitosamente del modificar\n ");
+						break;
+					default:
+						printf("\nOpcion invalida!!\n\n");
+						break;
+				}
+				retorno = 1;
+			}
+		}
+	}
+	return retorno;
+}
+
+
+/**
+ * \brief Calcula cuantos sueldos son mayores al promedio
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \param int promedio, es el promedio
+ * \return (-1) Error / (0) Ok
+ *
+ */
+int calcSueldosMayores(Employee list[],int len,int promedio)
+{
+	int retorno= -1;
+	int contadorMay=0;
+	if(list != NULL && len >= 0)
+		{
+			for(int i=0;i<len;i++)
+			{
+				if(list[i].isEmpty == 0 && list[i].salary > promedio)
+				{
+					contadorMay++;
+				}
+			}
+			retorno = contadorMay;
+		}
+
+	return retorno;
+}
+
+/**
+ * \brief Acomoda los usuarios por sector y luego por apellido y los muestra
+ * \param Alumno arrayAlumnos[], Es el puntero al array de alumnos
+ * \param int limite, es el limite de array
+ * \return (-1) Error / (0) Ok
+ *
+ */
+
+int sortEmployeesLastNameSector(Employee* list, int len)
+{
+    int retorno = -1;
+    int i;
+    Employee bufferEmployee;
+    int flagSwap = 1;
     if(list != NULL && len > 0)
     {
-        for(int i = 0; i < len; i++)
+        while(flagSwap)
         {
-            list[i].isEmpty = VERDAD;
-        }
-        ret = EXITO;
-    }
-    return ret;
-}
-
-
-int addEmployee(sEmployee* list, int len, int id, char name[],char lastName[],float salary,int sector)
-{
-    int ret = ERROR;
-    if(list != NULL && len > 0)
-    {
-        for(int i = 0; i < len; i++)
-        {
-            if(list[i].isEmpty == VERDAD)
+            flagSwap = 0;
+            for (i = 0; i < (len - 1); i++)
             {
-                list[i].id = 10 + i;
-                strcpy(list[i].name, name);
-                strcpy(list[i].lastName, lastName);
-                list[i].salary = salary;
-                list[i].sector = sector;
-                list[i].isEmpty = FALSO;
-                ret = EXITO;
-                break;
-            }
-        }
-    }
-
-    return ret;
-}
-
-int findEmployeeById(sEmployee* list, int len,int id)
-{
-    int ret = ERROR;
-    if(list != NULL && len > 0)
-    {
-        for(int i = 0; i < len; i++)
-        {
-            if(list[i].id == id && list[i].isEmpty == FALSO)
-            {
-                ret = i;
-                break;
-            }
-        }
-    }
-
-    return ret;
-}
-
-
-int removeEmployee(sEmployee* list, int len, int id)
-{
-    char respuesta;
-    int ret = ERROR;
-    if(len > 0 && list != NULL)
-    {
-        for(int i = 0; i < len; i++)
-        {
-            if(list[i].id == id)
-            {
-                printf("\nEstas seguro que quiere dar de baja al Empleado: \n");
-                printf("\n--->%10s    %10s    <---\n",list[i].name,list[i].lastName);
-                respuesta=getRespuesta();
-                if(respuesta=='s')
+                if(list[i].isEmpty || list[i+1].isEmpty)
                 {
-                    list[i].isEmpty = VERDAD;
-                    ret = EXITO;
-                    printf("Se realizo la baja exitosa.\n");
-                    break;
+                    continue;
                 }
-                else
+                if( strncmp(list[i].lastName, list[i+1].lastName,51) > 0 ||
+                    (strncmp(list[i].lastName, list[i+1].lastName,51) == 0 &&
+                    list[i].sector > list[i+1].sector))
                 {
-                    printf("\nUsted cancelo la baja con exito.\n");
-
-                    break;
-                }
-
-            }
-            else
-            {
-                printf("\nEl id ingresado no existe.");
-            }
-        }
-    }
-
-    return ret;
-}
-
-
-int sortEmployees(sEmployee* list, int len, int order)
-{
-    int ret = ERROR;
-    sEmployee aux;
-    if(len > 0 && list != NULL)
-    {
-        switch(order)
-        {
-        case DESCENDENTE:
-            for(int i = 0; i < len - 1; i++)
-            {
-                for(int j = i + 1; j < len; j++)
-                {
-                    if(strcmp(list[j].lastName, list[i].lastName) > 0 && list[j].isEmpty == FALSO && list[i].isEmpty == FALSO)
-                    {
-                        aux = list[i];
-                        list[i] = list[j];
-                        list[j] = aux;
-                    }
-                    else if(strcmp(list[j].lastName, list[i].lastName) == 0 && list[j].sector > list[i].sector  && list[j].isEmpty == FALSO && list[i].isEmpty == FALSO)
-                    {
-                        aux = list[i];
-                        list[i] = list[j];
-                        list[j] = aux;
-                    }
+                	bufferEmployee = list[i];
+                    list[i] = list[i+1];
+                    list[i+1] = bufferEmployee;
+                    flagSwap = 1;
                 }
             }
-            ret = EXITO;
-            break;
-        case ASCENDENTE:
-            for(int i = 0; i < len - 1; i++)
-            {
-                for(int j = i + 1; j < len; j++)
-                {
-                    if(strcmp(list[j].lastName, list[i].lastName) < 0  && list[j].isEmpty == FALSO && list[i].isEmpty == FALSO)
-                    {
-                        aux = list[i];
-                        list[i] = list[j];
-                        list[j] = aux;
-                    }
-                    else if(strcmp(list[j].lastName, list[i].lastName) == 0 && list[j].sector < list[i].sector  && list[j].isEmpty == FALSO && list[i].isEmpty == FALSO)
-                    {
-                        aux = list[i];
-                        list[i] = list[j];
-                        list[j] = aux;
-                    }
-                }
-            }
-            ret = EXITO;
-            break;
-        default:
-            printf("Opcion de ordenamiento invalida ");
         }
+        retorno = 0;
     }
-    return ret;
-}
-
-
-int printEmployees(sEmployee* list, int length)
-{
-    int ret = ERROR;
-    if(length > 0)
-    {
-        printf("\n\nID              Name                  LastName       Salary      Sector\n");
-        for(int i = 0; i < length; i++)
-        {
-            if(list[i].isEmpty == FALSO)
-            {
-                fflush(stdin);
-                printf("%6d %15s %23s %15.2f %6d\n", list[i].id, list[i].name, list[i].lastName, list[i].salary, list[i].sector);
-            }
-        }
-        printf("\n\n");
-        ret = EXITO;
-    }
-
-    return ret;
-}
-
-
-void TotalPromedioSalarios (sEmployee empleado[], int len)
-{
-    float prom = 0;
-    float total = 0;
-    int cantEmployee = 0;
-    int salariomayorapromedio = 0;
-
-    for(int i = 0; i < len; i++)
-    {
-        if(empleado[i].isEmpty == FALSO)
-        {
-            cantEmployee++;
-            total += empleado[i].salary;
-        }
-    }
-    prom = total/cantEmployee;
-
-    for(int i = 0; i < len; i++)
-    {
-        if(empleado[i].isEmpty == FALSO)
-        {
-            if(empleado[i].salary > prom)
-            {
-                salariomayorapromedio++;
-            }
-        }
-    }
-
-    printf("Total Salarios: %.2f\n\n", total);
-    printf("Promedio Salarios: %.2f\n\n", prom);
-    printf("Cantidad de Empleados que superan el promedio: %d\n\n", salariomayorapromedio);
-}
-
-
-int getIDEmployee(sEmployee empleado[],int tam)
-{
-    int id;
-    printEmployees(empleado,tam);
-    printf("Ingrese ID del Empleado ");
-    scanf("%d", &id);
-    return id;
+    return retorno;
 }
 
 
 
-void showMessage(int idret, int from, int hayempleados)
-{
-    if(idret != ERROR)
-    {
-        printf("\nEl proceso finalizo exitosamente\n");
-    }
-
-    else if(hayempleados == VERDAD)
-    {
-        switch(from)
-        {
-        case 1:
-            printf("\nError al dar de alta el Empleado.\n\n");
-            break;
-        case 2:
-            printf("\nNo se encuentra el ID del Empleado.\n\n");
-            break;
-        case 3:
-            printf("\nDebe cargar bien el tipo de dato.\n\n");
-            break;
-        case 4:
-            printf("\nSe completo la operacion\n\n");
-            break;
-        case 5:
-            printf("\nId Ingresado no existe.\n");
-            break;
-        default:
-            printf("ERROR");
-            break;
-        }
-    }
-    else
-    {
-        if(from == 1)
-        {
-            printf("Error al dar de alta el Empleado.\n\n");
-        }
-        else
-        {
-            printf("Error al ejecutar la operacion. Debe dar de alta un Empleado primero.\n\n");
-        }
-
-    }
-
-}
 
 
 
-int hayEmpleados(sEmployee empleado[], int tam)
-{
-    int ret = FALSO;
-
-    for(int i = 0; i < tam; i++)
-    {
-        if(empleado[i].isEmpty == FALSO)
-        {
-            ret = VERDAD;
-            break;
-        }
-    }
-
-    return ret;
-}
 
 
-int showMenuAndGetOption()
+/**
+ * \brief Muestra un menu
+ */
+
+
+int menu()
 {
     int opcion;
-
+    printf("\n----------------------------------------");
+    printf("\n                ABM                      \n");
+    printf("1-Alta empleado\n");
+    printf("2-Modificar empleado\n");
+    printf("3-Baja empleado\n");
+    printf("4-Informes\n");
+    printf("5-Salir\n");
+    printf("\nIngrese opcion: ");
     fflush(stdin);
-    printf("1-Alta\n");
-    printf("2-Baja\n");
-    printf("3-Modificacion\n");
-    printf("4-Mostrar empleados\n");
-    printf("5-Ordenar empleados\n");
-    printf("\nIngrese una opcion: ");
     scanf("%d", &opcion);
-
-    while(opcion < 1 || opcion > 5)
-    {
-        printf("Opcion incorrecta\n\n");
-        opcion = showMenuAndGetOption();
-
-        scanf("%d", &opcion);
-    }
 
     return opcion;
 }
 
-
-int getOptionEdit()
+int informes()
 {
-    char optionAux[50];
-    int option;
-    printf("Ingrese un valor segun el  campo que desea modificar: \n\n1 - NOMBRE\n2 - APELLIDO\n3 - SALARIO\n4 - SECTOR\n\n");
-       if (!getStringNumeros("\nIngrese una opcion: ",optionAux))
-                {
-                    printf ("La opcion es de 1 a 4.\n");
+    int respuesta;
 
-                }
-
-                else
-                {
-
-
-                option=atoi(optionAux);
-                }
-
-
-
-    return option;
-}
-
-
-
-int getOrder()
-{
-    int order;
-    printf("Ingrese el orden en que quiere ordenar el sector y apellido de los empleados\n0. Descendente\n1. Ascendente\n");
-    scanf("%d", &order);
-    return order;
-}
-
-
-
-char getRespuesta()
-{
-    char respuesta;
-
+    printf("                INFORMES                \n\n");
+    printf("1-Listado empleados\n");
+    printf("2-Total y promedio salarios\n");
+    printf("3-Salir\n");
+    printf("\nIngrese opcion: ");
     fflush(stdin);
-    printf("Desea continuar? [s/n]\n");
-    scanf("%c", &respuesta);
+    scanf("%d", &respuesta);
 
-    while(respuesta != 's' && respuesta != 'n')
-    {
-        fflush(stdin);
-        printf("Desea continuar? [s/n]\n");
-        scanf("%c", &respuesta);
-    }
     return respuesta;
-}
-
-int findFreePlace(sEmployee empleado[], int tam)
-{
-    int ret = ERROR;
-
-    for(int i = 0; i < tam; i++)
-    {
-        if(empleado[i].isEmpty == VERDAD)
-        {
-
-            ret = EXITO;
-        }
-    }
-
-    return ret;
-}
-
-int getStringNumeros(char mensaje[],char input[])
-{
-    char aux[256];
-    getString(mensaje,aux);
-    if(esNumerico(aux))
-    {
-        strcpy(input,aux);
-        return 1;
-    }
-    return 0;
-}
-void getString(char mensaje[],char input[])
-{
-    printf("%s",mensaje);
-    scanf ("%s", input);
-}
-
-
-int getStringLetras(char mensaje[],char input[])
-{
-    char aux[256];
-    int i=0;
-    getString(mensaje,aux);
-    if(esSoloLetras(aux))
-    {
-        strcpy(input,aux);
-        i++;
-    }
-    return i;
-}
-
-int esSoloLetras(char str[])
-{
-    int i=0;
-    while(str[i] != '\0')
-    {
-        if((str[i] != ' ') && (str[i] < 'a' || str[i] > 'z') && (str[i] < 'A' || str[i] > 'Z'))
-            return 0;
-        i++;
-    }
-    return 1;
-}
-
-int esNumerico(char str[])
-{
-    int i=0;
-    while(str[i] != '\0')
-    {
-        if(str[i] < '0' || str[i] > '9')
-            return 0;
-        i++;
-    }
-    return 1;
-}
-
-int getindex(sEmployee empleado[],int tam)
-{
-    int id;
-    int idAutomatico = ERROR;
-    fflush(stdin);
-    printEmployees(empleado,tam);
-    printf("Ingrese el ID del Empleado \n");
-    scanf("%d", &id);
-    idAutomatico = findEmployeeById(empleado,tam,  id);
-    return idAutomatico;
 }
